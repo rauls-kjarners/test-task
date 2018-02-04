@@ -26,7 +26,7 @@ class WebsiteController extends Controller
      */
     public function getSubstringsAction(Request $request): Response
     {
-        $result = null;
+        $result = [];
         $form   = $this
             ->createFormBuilder()
             ->add('string',     TextType::class,    ['label' => 'String: '])
@@ -40,7 +40,11 @@ class WebsiteController extends Controller
             $data      = $form->getData();
             $string    = (string)($data['string'] ?? '');
             $minLength = (int)($data['length'] ?? 0);
-            $result    = (new StringSupport)->getSubstrings($string, $minLength);
+
+            $stringSupport = $this->get(StringSupport::class);
+            while ($minLength > 0 && (\strlen($string) / $minLength) >= 2) {
+                $result[] = $stringSupport->getSubstrings($string, $minLength++);
+            }
         }
 
         return $this->render('base.html.twig', [
